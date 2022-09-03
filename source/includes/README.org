@@ -1,0 +1,21 @@
+The ~.h~ files in this directory and in the ~orig/~ directory are
+functionally the same.
+
+The only change is that comments spanning multiple lines are collapsed
+to a single line, otherwise the ~nimterop.cImport~ doesn't
+work.
+
+Here's an example:
+
+This in ~sv_vpi_user.h~:
+
+#+begin_src C
+#define cbReclaimObj          701 /* callback on class object reclaimed by
+                                     automatic memory management */
+#+end_src
+
+is converted to:
+
+#+begin_src C
+#define cbReclaimObj          701 /* callback on class object reclaimed by automatic memory management */
+#+end_src

@@ -1,0 +1,90 @@
+#+title: Wrapper for SystemVerilog VPI headers sv_vpi_user.h and vpi_user.h
+#+startup: align shrink
+
+* Installation
+#+begin_example
+nimble install svvpi
+#+end_example
+** How to get ~nimble~?
+Get Nim installation (which includes ~nimble~) from
+https://nim-lang.org/install.html.
+
+* Requirements
+User needs to have access to some Verilog/SystemVerilog simulator supporting
+VPI, like Cadence Xcelium.
+
+* Macros
+** ~vpiDefine~
+*** Defining a system task
+#+begin_src nim
+vpiDefine task <sys task>:
+  setup: # optional
+    # declarations of consts that you want to be made available to all procs
+  compiletf: # optional
+    # body of compiletf proc
+  calltf:
+    # body of calltf proc
+  userdata: # optional
+    # string
+  more: # optional
+    # further code like callback proc definitions and registering those.
+#+end_src
+
+At minimum, only the ~calltf~ is needed. Here's one example:
+#+begin_src nim
+vpiDefine task hello:
+  calltf:
+    vpiEcho "Hello!"
+#+end_src
+*** Defining a system function
+#+begin_src nim
+vpiDefine function <sys function>:
+  setup: # optional
+    # declarations of consts that you want to be made available to all procs
+  compiletf: # optional
+    # body of compiletf proc
+  calltf:
+    # body of calltf proc
+  functype: # optional
+    # Valid values: vpiIntFunc, vpiRealFunc, vpiTimeFunc, vpiSizedFunc, vpiSizedSignedFunc
+    # If this is not specified, and sizetf is not specified, it defaults to vpiIntFunc.
+    # If this is not specified, but sizetf is specified, it defaults to vpiSizedFunc.
+  sizetf: # optional
+    # integer
+    # If this is specified, but functype is not specified, the latter defaults to vpiSizedFunc.
+  userdata: # optional
+    # string
+  more: # optional
+    # further code like callback proc definitions and registering those.
+#+end_src
+
+At minimum, only the ~calltf~ is needed. Here's one example:
+#+begin_src nim
+vpiDefine function hello:
+  calltf:
+    vpiEcho "Hello!"
+#+end_src
+*** Special variables
+|---------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Variable      | Description                                                                                                                                                                                                   |
+|               | <100>                                                                                                                                                                                                         |
+|---------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| *userData*    | If a ~vpiDefine~ has set ~userdata: <some string>~, that string is available as this variable inside ~compiletf:~, ~calltf:~ and ~sizetf:~.                                                                   |
+| *systfHandle* | This ~VpiHandle~ variable is available inside ~compiletf:~ and ~calltf:~.                                                                                                                                |
+| *tfName*      | This string const is the task/function identifier with a ~$~ prefix. So if you have ~vpiDefine task mytask~, this variable is set to ~$mytask~. This variable is available anywhere in the ~vpiDefine~ scope. |
+|---------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+*** Examples
+See my [[https://github.com/kaushalmodi/nim-systemverilog-vpi][nim-systemverilog-vpi]] repo for example uses of ~vpiDefine~.
+* Templates
+** ~vpiException~
+Calling this template raises a ~VpiTfError~ type exception.
+
+Example usage:
+#+begin_src nim
+if argIter == nil:
+  vpiException &"{tfName} requires 1 argument; has none"
+#+end_src
+* Versions tested
+- Cadence Xcelium :: 20.09-s09
+- OS :: CentOS 7.6
+- Nim :: 1.5.1 as of 2021-04-30 Fri.
